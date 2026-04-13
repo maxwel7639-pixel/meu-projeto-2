@@ -1,0 +1,500 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>LeadBot Pro — CRM</title>
+<style>
+  * { margin:0; padding:0; box-sizing:border-box; }
+  body { font-family:'Segoe UI',sans-serif; background:#0a0a0a; color:#fff; display:flex; min-height:100vh; }
+
+  /* SIDEBAR */
+  .sidebar { width:240px; background:#111; border-right:1px solid #1e1e1e;
+             padding:24px 0; display:flex; flex-direction:column; position:fixed;
+             height:100vh; }
+  .logo { font-size:18px; font-weight:700; color:#7c3aed; padding:0 24px 32px; }
+  .nav-item { padding:12px 24px; cursor:pointer; color:#666; font-size:14px;
+              display:flex; align-items:center; gap:10px; transition:all 0.2s; }
+  .nav-item:hover, .nav-item.active { background:#1a1a1a; color:#fff; border-left:3px solid #7c3aed; }
+
+  /* MAIN */
+  .main { margin-left:240px; flex:1; padding:32px; }
+
+  /* HEADER */
+  .header { display:flex; justify-content:space-between; align-items:center; margin-bottom:32px; }
+  .header h1 { font-size:24px; font-weight:700; }
+  .header-actions { display:flex; gap:12px; align-items:center; }
+  input[type=text] { background:#111; border:1px solid #222; color:#fff; padding:10px 16px;
+                     border-radius:8px; font-size:14px; width:240px; }
+  .btn { padding:10px 20px; border-radius:8px; font-size:14px; font-weight:600;
+         cursor:pointer; border:none; transition:all 0.2s; }
+  .btn-primary { background:#7c3aed; color:#fff; }
+  .btn-primary:hover { background:#6d28d9; }
+  .btn-outline { background:transparent; color:#fff; border:1px solid #333; }
+
+  /* STATS CARDS */
+  .stats-grid { display:grid; grid-template-columns:repeat(4,1fr); gap:16px; margin-bottom:32px; }
+  .stat-card { background:#111; border:1px solid #1e1e1e; border-radius:12px; padding:20px; }
+  .stat-card .label { color:#666; font-size:13px; margin-bottom:8px; }
+  .stat-card .value { font-size:28px; font-weight:700; }
+  .stat-card .sub { color:#666; font-size:12px; margin-top:4px; }
+  .purple { color:#7c3aed; }
+  .green { color:#10b981; }
+  .yellow { color:#f59e0b; }
+  .blue { color:#3b82f6; }
+
+  /* TOOLBAR */
+  .toolbar { display:flex; gap:8px; margin-bottom:20px; }
+  .filter-btn { padding:7px 16px; border-radius:6px; font-size:13px; cursor:pointer;
+                border:1px solid #222; background:transparent; color:#666; }
+  .filter-btn.active { background:#7c3aed; color:#fff; border-color:#7c3aed; }
+
+  /* TABLE */
+  .table-wrap { background:#111; border:1px solid #1e1e1e; border-radius:12px; overflow:hidden; }
+  table { width:100%; border-collapse:collapse;
+cat > /workspaces/meu-projeto-2/frontend/crm/index.html << 'ENDOFFILE'
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>LeadBot Pro — CRM</title>
+<style>
+  * { margin:0; padding:0; box-sizing:border-box; }
+  body { font-family:'Segoe UI',sans-serif; background:#0a0a0a; color:#fff; display:flex; min-height:100vh; }
+
+  /* SIDEBAR */
+  .sidebar { width:240px; background:#111; border-right:1px solid #1e1e1e;
+             padding:24px 0; display:flex; flex-direction:column; position:fixed;
+             height:100vh; }
+  .logo { font-size:18px; font-weight:700; color:#7c3aed; padding:0 24px 32px; }
+  .nav-item { padding:12px 24px; cursor:pointer; color:#666; font-size:14px;
+              display:flex; align-items:center; gap:10px; transition:all 0.2s; }
+  .nav-item:hover, .nav-item.active { background:#1a1a1a; color:#fff; border-left:3px solid #7c3aed; }
+
+  /* MAIN */
+  .main { margin-left:240px; flex:1; padding:32px; }
+
+  /* HEADER */
+  .header { display:flex; justify-content:space-between; align-items:center; margin-bottom:32px; }
+  .header h1 { font-size:24px; font-weight:700; }
+  .header-actions { display:flex; gap:12px; align-items:center; }
+  input[type=text] { background:#111; border:1px solid #222; color:#fff; padding:10px 16px;
+                     border-radius:8px; font-size:14px; width:240px; }
+  .btn { padding:10px 20px; border-radius:8px; font-size:14px; font-weight:600;
+         cursor:pointer; border:none; transition:all 0.2s; }
+  .btn-primary { background:#7c3aed; color:#fff; }
+  .btn-primary:hover { background:#6d28d9; }
+  .btn-outline { background:transparent; color:#fff; border:1px solid #333; }
+
+  /* STATS CARDS */
+  .stats-grid { display:grid; grid-template-columns:repeat(4,1fr); gap:16px; margin-bottom:32px; }
+  .stat-card { background:#111; border:1px solid #1e1e1e; border-radius:12px; padding:20px; }
+  .stat-card .label { color:#666; font-size:13px; margin-bottom:8px; }
+  .stat-card .value { font-size:28px; font-weight:700; }
+  .stat-card .sub { color:#666; font-size:12px; margin-top:4px; }
+  .purple { color:#7c3aed; }
+  .green { color:#10b981; }
+  .yellow { color:#f59e0b; }
+  .blue { color:#3b82f6; }
+
+  /* TOOLBAR */
+  .toolbar { display:flex; gap:8px; margin-bottom:20px; }
+  .filter-btn { padding:7px 16px; border-radius:6px; font-size:13px; cursor:pointer;
+                border:1px solid #222; background:transparent; color:#666; }
+  .filter-btn.active { background:#7c3aed; color:#fff; border-color:#7c3aed; }
+
+  /* TABLE */
+  .table-wrap { background:#111; border:1px solid #1e1e1e; border-radius:12px; overflow:hidden; }
+  table { width:100%; border-collapse:collapse; }
+  th { padding:14px 20px; text-align:left; font-size:12px; color:#444;
+       text-transform:uppercase; border-bottom:1px solid #1e1e1e; font-weight:600; }
+  td { padding:16px 20px; font-size:14px; border-bottom:1px solid #111; vertical-align:middle; }
+  tr:last-child td { border-bottom:none; }
+  tr:hover td { background:#151515; }
+  .avatar { width:36px; height:36px; border-radius:50%; background:#7c3aed;
+            display:flex; align-items:center; justify-content:center;
+            font-size:14px; font-weight:700; flex-shrink:0; }
+  .lead-info { display:flex; align-items:center; gap:12px; }
+  .lead-name { font-weight:600; font-size:14px; }
+  .lead-user { color:#666; font-size:12px; }
+  .badge { padding:4px 10px; border-radius:20px; font-size:11px; font-weight:600; }
+  .badge.novo { background:#1a0a2e; color:#a78bfa; }
+  .badge.enviado { background:#0a1f2e; color:#38bdf8; }
+  .badge.respondido { background:#0a2e1a; color:#34d399; }
+  .badge.convertido { background:#1a2e0a; color:#86efac; }
+  .msg-preview { color:#666; font-size:13px; max-width:300px;
+                 white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+  .action-btn { padding:6px 14px; border-radius:6px; font-size:12px; font-weight:600;
+                cursor:pointer; border:1px solid #222; background:transparent; color:#ccc; }
+  .action-btn:hover { background:#7c3aed; border-color:#7c3aed; color:#fff; }
+
+  /* MODAL */
+  .modal-overlay { display:none; position:fixed; inset:0; background:rgba(0,0,0,0.8);
+                   z-index:1000; align-items:center; justify-content:center; }
+  .modal-overlay.open { display:flex; }
+  .modal { background:#111; border:1px solid #222; border-radius:16px;
+           padding:32px; width:90%; max-width:560px; }
+  .modal h3 { font-size:18px; font-weight:700; margin-bottom:20px; }
+  .modal-field { margin-bottom:16px; }
+  .modal-field label { display:block; font-size:13px; color:#666; margin-bottom:6px; }
+  .modal-field textarea { width:100%; background:#0a0a0a; border:1px solid #222;
+                          color:#fff; padding:12px; border-radius:8px; font-size:14px;
+                          min-height:100px; resize:vertical; font-family:inherit; }
+  .modal-field p { background:#0a0a0a; border:1px solid #222; padding:12px;
+                   border-radius:8px; font-size:14px; color:#ccc; line-height:1.6; }
+  .modal-actions { display:flex; gap:12px; justify-content:flex-end; margin-top:20px; }
+  .status-select { background:#0a0a0a; border:1px solid #222; color:#fff;
+                   padding:8px 12px; border-radius:8px; font-size:14px; }
+
+  /* PROCESSAR MODAL */
+  .process-modal { background:#111; border:1px solid #222; border-radius:16px;
+                   padding:32px; width:90%; max-width:480px; }
+  .process-modal h3 { font-size:18px; font-weight:700; margin-bottom:20px; }
+  .process-modal input { width:100%; background:#0a0a0a; border:1px solid #222;
+                         color:#fff; padding:12px; border-radius:8px; font-size:14px;
+                         margin-bottom:16px; }
+
+  /* EMPTY STATE */
+  .empty { text-align:center; padding:60px 20px; color:#444; }
+  .empty h3 { font-size:18px; margin-bottom:8px; color:#666; }
+
+  /* LOADING */
+  .loading { text-align:center; padding:40px; color:#666; }
+</style>
+</head>
+<body>
+
+<!-- SIDEBAR -->
+<aside class="sidebar">
+  <div class="logo">🤖 LeadBot Pro</div>
+  <div class="nav-item active" onclick="showSection('leads')">📋 Leads</div>
+  <div class="nav-item" onclick="showSection('processar')">⚡ Processar Post</div>
+  <div class="nav-item" onclick="showSection('stats')">📊 Estatísticas</div>
+  <div style="margin-top:auto;padding:24px">
+    <div style="font-size:12px;color:#444;margin-bottom:8px">Workspace</div>
+    <div style="font-size:13px;color:#666" id="ws-nome">Carregando...</div>
+    <div style="font-size:11px;color:#7c3aed;margin-top:4px" id="ws-plano"></div>
+    <div style="font-size:11px;color:#444;margin-top:4px" id="ws-uso"></div>
+  </div>
+</aside>
+
+<!-- MAIN -->
+<main class="main">
+
+  <!-- HEADER -->
+  <div class="header">
+    <h1 id="page-title">Leads</h1>
+    <div class="header-actions">
+      <input type="text" id="search" placeholder="Buscar lead..." oninput="filtrarLeads()">
+      <button class="btn btn-primary" onclick="abrirProcessar()">⚡ Processar Post</button>
+    </div>
+  </div>
+
+  <!-- STATS -->
+  <div class="stats-grid" id="stats-grid">
+    <div class="stat-card">
+      <div class="label">Total de Leads</div>
+      <div class="value purple" id="total-leads">—</div>
+      <div class="sub">todos os tempos</div>
+    </div>
+    <div class="stat-card">
+      <div class="label">Novos</div>
+      <div class="value blue" id="leads-novos">—</div>
+      <div class="sub">aguardando envio</div>
+    </div>
+    <div class="stat-card">
+      <div class="label">Respondidos</div>
+      <div class="value yellow" id="leads-respondidos">—</div>
+      <div class="sub">em negociação</div>
+    </div>
+    <div class="stat-card">
+      <div class="label">Convertidos</div>
+      <div class="value green" id="leads-convertidos">—</div>
+      <div class="sub">fechados</div>
+    </div>
+  </div>
+
+  <!-- FILTROS -->
+  <div class="toolbar">
+    <button class="filter-btn active" onclick="setFiltro('todos',this)">Todos</button>
+    <button class="filter-btn" onclick="setFiltro('novo',this)">Novos</button>
+    <button class="filter-btn" onclick="setFiltro('enviado',this)">Enviados</button>
+    <button class="filter-btn" onclick="setFiltro('respondido',this)">Respondidos</button>
+    <button class="filter-btn" onclick="setFiltro('convertido',this)">Convertidos</button>
+  </div>
+
+  <!-- TABELA -->
+  <div class="table-wrap">
+    <table>
+      <thead>
+        <tr>
+          <th>Lead</th>
+          <th>Comentário</th>
+          <th>Mensagem gerada</th>
+          <th>Status</th>
+          <th>Data</th>
+          <th>Ação</th>
+        </tr>
+      </thead>
+      <tbody id="leads-tbody">
+        <tr><td colspan="6" class="loading">Carregando leads...</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+</main>
+
+<!-- MODAL VER LEAD -->
+<div class="modal-overlay" id="modal-lead">
+  <div class="modal">
+    <h3>📋 Detalhes do Lead</h3>
+    <div class="modal-field">
+      <label>Lead</label>
+      <p id="modal-nome">—</p>
+    </div>
+    <div class="modal-field">
+      <label>Comentário original</label>
+      <p id="modal-comentario">—</p>
+    </div>
+    <div class="modal-field">
+      <label>Mensagem gerada pela IA</label>
+      <textarea id="modal-mensagem" rows="5"></textarea>
+    </div>
+    <div class="modal-field">
+      <label>Status</label>
+      <select class="status-select" id="modal-status">
+        <option value="novo">Novo</option>
+        <option value="enviado">Enviado</option>
+        <option value="respondido">Respondido</option>
+        <option value="convertido">Convertido</option>
+      </select>
+    </div>
+    <div class="modal-actions">
+      <button class="btn btn-outline" onclick="fecharModal()">Fechar</button>
+      <button class="btn btn-primary" onclick="copiarMensagem()">📋 Copiar mensagem</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL PROCESSAR POST -->
+<div class="modal-overlay" id="modal-processar">
+  <div class="process-modal">
+    <h3>⚡ Processar Post do Instagram</h3>
+    <div class="modal-field">
+      <label style="display:block;font-size:13px;color:#666;margin-bottom:8px">
+        ID ou URL do post
+      </label>
+      <input type="text" id="post-id-input"
+             placeholder="Ex: 17854360229135492 ou URL do post">
+    </div>
+    <div id="process-result" style="display:none;margin-bottom:16px;padding:12px;
+         background:#0a0a0a;border-radius:8px;font-size:14px;color:#10b981;"></div>
+    <div class="modal-actions">
+      <button class="btn btn-outline" onclick="fecharProcessar()">Cancelar</button>
+      <button class="btn btn-primary" id="btn-processar" onclick="processarPost()">
+        ⚡ Processar agora
+      </button>
+    </div>
+  </div>
+</div>
+
+<script>
+const TOKEN = prompt("Cole seu token de acesso LeadBot Pro:") || "";
+const API   = "http://localhost:5000";
+
+let todosLeads   = [];
+let filtroAtual  = "todos";
+let leadAtual    = null;
+
+// ── Inicializar ──
+async function init() {
+  await carregarStatus();
+  await carregarLeads();
+}
+
+// ── Status do workspace ──
+async function carregarStatus() {
+  try {
+    const r = await fetch(`${API}/api/status`, {
+      headers: { "Authorization": `Bearer ${TOKEN}` }
+    });
+    const d = await r.json();
+    document.getElementById("ws-nome").textContent  = d.workspace || "—";
+    document.getElementById("ws-plano").textContent = "Plano " + (d.plano || "—");
+    document.getElementById("ws-uso").textContent   =
+      `${d.usados || 0} / ${d.limite === 999999 ? "∞" : d.limite} leads`;
+  } catch(e) {
+    document.getElementById("ws-nome").textContent = "Erro de conexão";
+  }
+}
+
+// ── Carregar leads ──
+async function carregarLeads() {
+  try {
+    const r = await fetch(`${API}/api/leads`, {
+      headers: { "Authorization": `Bearer ${TOKEN}` }
+    });
+    todosLeads = await r.json();
+    atualizarStats();
+    renderLeads();
+  } catch(e) {
+    document.getElementById("leads-tbody").innerHTML =
+      `<tr><td colspan="6" class="empty"><h3>Erro ao carregar leads</h3>
+       <p>Verifique se a API está rodando</p></td></tr>`;
+  }
+}
+
+// ── Stats ──
+function atualizarStats() {
+  document.getElementById("total-leads").textContent      = todosLeads.length;
+  document.getElementById("leads-novos").textContent      = todosLeads.filter(l=>l.status==="novo").length;
+  document.getElementById("leads-respondidos").textContent= todosLeads.filter(l=>l.status==="respondido").length;
+  document.getElementById("leads-convertidos").textContent= todosLeads.filter(l=>l.status==="convertido").length;
+}
+
+// ── Render tabela ──
+function renderLeads() {
+  const busca   = document.getElementById("search").value.toLowerCase();
+  let filtrados = todosLeads.filter(l => {
+    const matchFiltro = filtroAtual === "todos" || l.status === filtroAtual;
+    const matchBusca  = !busca ||
+      (l.nome||"").toLowerCase().includes(busca) ||
+      (l.username||"").toLowerCase().includes(busca) ||
+      (l.comentario||"").toLowerCase().includes(busca);
+    return matchFiltro && matchBusca;
+  });
+
+  if (!filtrados.length) {
+    document.getElementById("leads-tbody").innerHTML =
+      `<tr><td colspan="6" class="empty">
+        <h3>Nenhum lead encontrado</h3>
+        <p>Processe um post para gerar leads</p>
+      </td></tr>`;
+    return;
+  }
+
+  document.getElementById("leads-tbody").innerHTML = filtrados.map(l => `
+    <tr>
+      <td>
+        <div class="lead-info">
+          <div class="avatar">${(l.nome||"?")[0].toUpperCase()}</div>
+          <div>
+            <div class="lead-name">${l.nome || "—"}</div>
+            <div class="lead-user">@${l.username || "—"}</div>
+          </div>
+        </div>
+      </td>
+      <td><div class="msg-preview">${l.comentario || "—"}</div></td>
+      <td><div class="msg-preview">${l.mensagem_gerada || "—"}</div></td>
+      <td><span class="badge ${l.status}">${l.status}</span></td>
+      <td style="color:#666;font-size:13px">${formatarData(l.created_at)}</td>
+      <td><button class="action-btn" onclick="verLead('${l.id}')">Ver →</button></td>
+    </tr>
+  `).join("");
+}
+
+// ── Filtro ──
+function setFiltro(f, btn) {
+  filtroAtual = f;
+  document.querySelectorAll(".filter-btn").forEach(b => b.classList.remove("active"));
+  btn.classList.add("active");
+  renderLeads();
+}
+
+function filtrarLeads() { renderLeads(); }
+
+// ── Ver lead ──
+function verLead(id) {
+  leadAtual = todosLeads.find(l => l.id === id);
+  if (!leadAtual) return;
+  document.getElementById("modal-nome").textContent       = `${leadAtual.nome} (@${leadAtual.username})`;
+  document.getElementById("modal-comentario").textContent = leadAtual.comentario || "—";
+  document.getElementById("modal-mensagem").value         = leadAtual.mensagem_gerada || "—";
+  document.getElementById("modal-status").value           = leadAtual.status || "novo";
+  document.getElementById("modal-lead").classList.add("open");
+}
+
+function fecharModal() {
+  document.getElementById("modal-lead").classList.remove("open");
+  leadAtual = null;
+}
+
+function copiarMensagem() {
+  const msg = document.getElementById("modal-mensagem").value;
+  navigator.clipboard.writeText(msg);
+  alert("✅ Mensagem copiada!");
+}
+
+// ── Processar post ──
+function abrirProcessar() {
+  document.getElementById("modal-processar").classList.add("open");
+  document.getElementById("process-result").style.display = "none";
+}
+
+function fecharProcessar() {
+  document.getElementById("modal-processar").classList.remove("open");
+  document.getElementById("post-id-input").value = "";
+}
+
+async function processarPost() {
+  const postId = document.getElementById("post-id-input").value.trim();
+  if (!postId) return alert("Cole o ID do post!");
+
+  const btn = document.getElementById("btn-processar");
+  btn.textContent = "⏳ Processando...";
+  btn.disabled = true;
+
+  try {
+    const r = await fetch(`${API}/api/processar`, {
+      method: "POST",
+      headers: {
+        "Authorization": `Bearer ${TOKEN}`,
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify({ post_id: postId })
+    });
+    const d = await r.json();
+    const result = document.getElementById("process-result");
+    result.style.display = "block";
+    if (d.erro) {
+      result.style.color = "#ef4444";
+      result.textContent = "❌ " + d.erro;
+    } else {
+      result.style.color = "#10b981";
+      result.textContent = `✅ ${d.total} leads gerados com sucesso!`;
+      setTimeout(() => { fecharProcessar(); carregarLeads(); }, 2000);
+    }
+  } catch(e) {
+    alert("Erro ao processar. Verifique a API.");
+  } finally {
+    btn.textContent = "⚡ Processar agora";
+    btn.disabled = false;
+  }
+}
+
+// ── Utils ──
+function formatarData(iso) {
+  if (!iso) return "—";
+  return new Date(iso).toLocaleDateString("pt-BR", {
+    day:"2-digit", month:"2-digit", year:"2-digit",
+    hour:"2-digit", minute:"2-digit"
+  });
+}
+
+function showSection(s) {
+  document.querySelectorAll(".nav-item").forEach(n => n.classList.remove("active"));
+  event.target.classList.add("active");
+}
+
+// Fechar modal clicando fora
+document.querySelectorAll(".modal-overlay").forEach(m => {
+  m.addEventListener("click", e => {
+    if (e.target === m) { m.classList.remove("open"); }
+  });
+});
+
+init();
+</script>
+</body>
+</html>
