@@ -13,14 +13,18 @@ load_dotenv(os.path.join(os.path.dirname(__file__), '../.env'))
 app = Flask(__name__)
 CORS(app)
 
-supabase = create_client(os.getenv("SUPABASE_URL"), os.getenv("SUPABASE_KEY"))
+supabase = create_client(os.getenv("SUPABASE_URL"), os.getenv("SUPABASE_SERVICE_KEY"))
 
 def get_workspace(req):
     token = req.headers.get("Authorization", "").replace("Bearer ", "")
     if not token:
         return None
-    ws = supabase.table("workspaces").select("*").eq("token", token).single().execute()
-    return ws.data if ws.data else None
+    try:
+        result = supabase.table("workspaces").select("*").eq("token", token).execute()
+        return result.data[0] if result.data else None
+    except Exception as e:
+        print(f"get_workspace erro: {e}")
+        return None
 
 @app.route("/health", methods=["GET"])
 def health():
