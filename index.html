@@ -1,0 +1,416 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>LeadBot Pro — CRM</title>
+<style>
+  * { margin:0; padding:0; box-sizing:border-box; }
+  body { font-family:'Segoe UI',sans-serif; background:#0a0a0a; color:#fff; display:flex; min-height:100vh; }
+  .sidebar { width:240px; background:#111; border-right:1px solid #1e1e1e; padding:24px 0; display:flex; flex-direction:column; position:fixed; height:100vh; }
+  .logo { font-size:18px; font-weight:700; color:#7c3aed; padding:0 24px 32px; }
+  .nav-item { padding:12px 24px; cursor:pointer; color:#666; font-size:14px; display:flex; align-items:center; gap:10px; transition:all 0.2s; border-left:3px solid transparent; }
+  .nav-item:hover, .nav-item.active { background:#1a1a1a; color:#fff; border-left-color:#7c3aed; }
+  .main { margin-left:240px; flex:1; padding:32px; }
+  .section { display:none; }
+  .section.active { display:block; }
+  .header { display:flex; justify-content:space-between; align-items:center; margin-bottom:32px; }
+  .header h1 { font-size:24px; font-weight:700; }
+  .header-actions { display:flex; gap:12px; align-items:center; }
+  input[type=text] { background:#111; border:1px solid #222; color:#fff; padding:10px 16px; border-radius:8px; font-size:14px; width:240px; }
+  .btn { padding:10px 20px; border-radius:8px; font-size:14px; font-weight:600; cursor:pointer; border:none; transition:all 0.2s; }
+  .btn-primary { background:#7c3aed; color:#fff; }
+  .btn-primary:hover { background:#6d28d9; }
+  .btn-outline { background:transparent; color:#fff; border:1px solid #333; }
+  .btn-outline:hover { background:#1a1a1a; }
+  .stats-grid { display:grid; grid-template-columns:repeat(4,1fr); gap:16px; margin-bottom:32px; }
+  .stat-card { background:#111; border:1px solid #1e1e1e; border-radius:12px; padding:20px; }
+  .stat-card .label { color:#666; font-size:13px; margin-bottom:8px; }
+  .stat-card .value { font-size:28px; font-weight:700; }
+  .stat-card .sub { color:#666; font-size:12px; margin-top:4px; }
+  .purple { color:#7c3aed; } .green { color:#10b981; } .yellow { color:#f59e0b; } .blue { color:#3b82f6; }
+  .toolbar { display:flex; gap:8px; margin-bottom:20px; }
+  .filter-btn { padding:7px 16px; border-radius:6px; font-size:13px; cursor:pointer; border:1px solid #222; background:transparent; color:#666; }
+  .filter-btn.active { background:#7c3aed; color:#fff; border-color:#7c3aed; }
+  .table-wrap { background:#111; border:1px solid #1e1e1e; border-radius:12px; overflow:hidden; }
+  table { width:100%; border-collapse:collapse; }
+  th { padding:14px 20px; text-align:left; font-size:12px; color:#444; text-transform:uppercase; border-bottom:1px solid #1e1e1e; font-weight:600; }
+  td { padding:14px 20px; font-size:14px; border-bottom:1px solid #111; vertical-align:middle; }
+  tr:last-child td { border-bottom:none; }
+  tr:hover td { background:#151515; }
+  .avatar { width:36px; height:36px; border-radius:50%; background:#7c3aed; display:flex; align-items:center; justify-content:center; font-size:14px; font-weight:700; flex-shrink:0; }
+  .lead-info { display:flex; align-items:center; gap:12px; }
+  .lead-name { font-weight:600; font-size:14px; }
+  .lead-user { color:#666; font-size:12px; }
+  .badge { padding:4px 10px; border-radius:20px; font-size:11px; font-weight:600; }
+  .badge.novo { background:#1a0a2e; color:#a78bfa; }
+  .badge.enviado { background:#0a1f2e; color:#38bdf8; }
+  .badge.respondido { background:#0a2e1a; color:#34d399; }
+  .badge.convertido { background:#1a2e0a; color:#86efac; }
+  .msg-preview { color:#666; font-size:13px; max-width:200px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+  .actions-cell { display:flex; gap:6px; align-items:center; }
+  .action-btn { padding:5px 12px; border-radius:6px; font-size:12px; font-weight:600; cursor:pointer; border:1px solid #222; background:transparent; color:#ccc; white-space:nowrap; }
+  .action-btn:hover { background:#7c3aed; border-color:#7c3aed; color:#fff; }
+  .action-btn.ia { border-color:#7c3aed33; color:#a78bfa; }
+  .action-btn.ia:hover { background:#7c3aed; border-color:#7c3aed; color:#fff; }
+  .modal-overlay { display:none; position:fixed; inset:0; background:rgba(0,0,0,0.8); z-index:1000; align-items:center; justify-content:center; }
+  .modal-overlay.open { display:flex; }
+  .modal { background:#111; border:1px solid #222; border-radius:16px; padding:32px; width:90%; max-width:560px; }
+  .modal h3 { font-size:18px; font-weight:700; margin-bottom:20px; }
+  .modal-field { margin-bottom:16px; }
+  .modal-field label { display:block; font-size:13px; color:#666; margin-bottom:6px; }
+  .modal-field textarea { width:100%; background:#0a0a0a; border:1px solid #222; color:#fff; padding:12px; border-radius:8px; font-size:14px; min-height:120px; resize:vertical; font-family:inherit; }
+  .modal-field p { background:#0a0a0a; border:1px solid #222; padding:12px; border-radius:8px; font-size:14px; color:#ccc; line-height:1.6; }
+  .modal-actions { display:flex; gap:12px; justify-content:flex-end; margin-top:20px; }
+  .status-select { background:#0a0a0a; border:1px solid #222; color:#fff; padding:8px 12px; border-radius:8px; font-size:14px; width:100%; }
+  .ia-loading { color:#7c3aed; font-size:13px; padding:12px; background:#0a0a0a; border:1px solid #222; border-radius:8px; text-align:center; }
+  .process-modal { background:#111; border:1px solid #222; border-radius:16px; padding:32px; width:90%; max-width:480px; }
+  .process-modal h3 { font-size:18px; font-weight:700; margin-bottom:20px; }
+  .process-modal input { width:100%; background:#0a0a0a; border:1px solid #222; color:#fff; padding:12px; border-radius:8px; font-size:14px; margin-bottom:16px; }
+  .empty { text-align:center; padding:60px 20px; color:#444; }
+  .empty h3 { font-size:18px; margin-bottom:8px; color:#666; }
+  .loading { text-align:center; padding:40px; color:#666; }
+  /* STATS PAGE */
+  .stats-page-grid { display:grid; grid-template-columns:repeat(2,1fr); gap:20px; margin-top:8px; }
+  .stats-big-card { background:#111; border:1px solid #1e1e1e; border-radius:12px; padding:28px; }
+  .stats-big-card h3 { font-size:14px; color:#666; margin-bottom:16px; text-transform:uppercase; letter-spacing:0.05em; }
+  .stats-row { display:flex; justify-content:space-between; align-items:center; padding:10px 0; border-bottom:1px solid #1a1a1a; }
+  .stats-row:last-child { border-bottom:none; }
+  .stats-row span:first-child { color:#888; font-size:14px; }
+  .stats-row span:last-child { font-weight:700; font-size:16px; }
+  /* SIDEBAR BOTTOM */
+  .sidebar-bottom { margin-top:auto; padding:24px; border-top:1px solid #1a1a1a; }
+  .ws-label { font-size:12px; color:#444; margin-bottom:6px; }
+  .ws-nome { font-size:13px; color:#888; }
+  .ws-plano { font-size:11px; color:#7c3aed; margin-top:4px; }
+  .ws-uso { font-size:11px; color:#444; margin-top:4px; }
+</style>
+</head>
+<body>
+
+<aside class="sidebar">
+  <div class="logo">🤖 LeadBot Pro</div>
+  <div class="nav-item active" onclick="showSection('leads',this)">📋 Leads</div>
+  <div class="nav-item" onclick="showSection('processar',this)">⚡ Processar Post</div>
+  <div class="nav-item" onclick="showSection('estatisticas',this)">📊 Estatísticas</div>
+  <div class="sidebar-bottom">
+    <div class="ws-label">Workspace</div>
+    <div class="ws-nome" id="ws-nome">Carregando...</div>
+    <div class="ws-plano" id="ws-plano"></div>
+    <div class="ws-uso" id="ws-uso"></div>
+  </div>
+</aside>
+
+<main class="main">
+
+  <!-- ── SEÇÃO LEADS ── -->
+  <div class="section active" id="section-leads">
+    <div class="header">
+      <h1>Leads</h1>
+      <div class="header-actions">
+        <input type="text" id="search" placeholder="Buscar lead..." oninput="renderLeads()">
+        <button class="btn btn-primary" onclick="showSection('processar', document.querySelectorAll('.nav-item')[1])">⚡ Processar Post</button>
+      </div>
+    </div>
+    <div class="stats-grid">
+      <div class="stat-card"><div class="label">Total de Leads</div><div class="value purple" id="total-leads">—</div><div class="sub">todos os tempos</div></div>
+      <div class="stat-card"><div class="label">Novos</div><div class="value blue" id="leads-novos">—</div><div class="sub">aguardando envio</div></div>
+      <div class="stat-card"><div class="label">Respondidos</div><div class="value yellow" id="leads-respondidos">—</div><div class="sub">em negociação</div></div>
+      <div class="stat-card"><div class="label">Convertidos</div><div class="value green" id="leads-convertidos">—</div><div class="sub">fechados</div></div>
+    </div>
+    <div class="toolbar">
+      <button class="filter-btn active" onclick="setFiltro('todos',this)">Todos</button>
+      <button class="filter-btn" onclick="setFiltro('novo',this)">Novos</button>
+      <button class="filter-btn" onclick="setFiltro('enviado',this)">Enviados</button>
+      <button class="filter-btn" onclick="setFiltro('respondido',this)">Respondidos</button>
+      <button class="filter-btn" onclick="setFiltro('convertido',this)">Convertidos</button>
+    </div>
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th>Lead</th>
+            <th>Comentário</th>
+            <th>Mensagem IA</th>
+            <th>Status</th>
+            <th>Data</th>
+            <th>Ações</th>
+          </tr>
+        </thead>
+        <tbody id="leads-tbody">
+          <tr><td colspan="6" class="loading">Carregando leads...</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- ── SEÇÃO PROCESSAR ── -->
+  <div class="section" id="section-processar">
+    <div class="header"><h1>⚡ Processar Post</h1></div>
+    <div style="max-width:560px">
+      <div style="background:#111;border:1px solid #1e1e1e;border-radius:16px;padding:32px;">
+        <p style="color:#666;font-size:14px;margin-bottom:24px;line-height:1.6">
+          Cole o ID ou URL de um post do Instagram. O LeadBot vai buscar todos os comentários,
+          classificar os interessados com IA e gerar mensagens personalizadas para cada um.
+        </p>
+        <div class="modal-field">
+          <label style="display:block;font-size:13px;color:#666;margin-bottom:8px">ID ou URL do post</label>
+          <input type="text" id="post-id-input" placeholder="Ex: 17854360229135492" style="width:100%;background:#0a0a0a;border:1px solid #222;color:#fff;padding:12px;border-radius:8px;font-size:14px;margin-bottom:16px;">
+        </div>
+        <div id="process-result" style="display:none;margin-bottom:16px;padding:12px;background:#0a0a0a;border-radius:8px;font-size:14px;"></div>
+        <button class="btn btn-primary" id="btn-processar" onclick="processarPost()" style="width:100%;padding:14px;">
+          ⚡ Processar agora
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── SEÇÃO ESTATÍSTICAS ── -->
+  <div class="section" id="section-estatisticas">
+    <div class="header"><h1>📊 Estatísticas</h1></div>
+    <div class="stats-grid">
+      <div class="stat-card"><div class="label">Total de Leads</div><div class="value purple" id="stat-total">—</div><div class="sub">todos os tempos</div></div>
+      <div class="stat-card"><div class="label">Taxa de Conversão</div><div class="value green" id="stat-conversao">—</div><div class="sub">convertidos / total</div></div>
+      <div class="stat-card"><div class="label">Mensagens Geradas</div><div class="value blue" id="stat-mensagens">—</div><div class="sub">pela IA</div></div>
+      <div class="stat-card"><div class="label">Uso do Plano</div><div class="value yellow" id="stat-uso">—</div><div class="sub" id="stat-limite"></div></div>
+    </div>
+    <div class="stats-page-grid">
+      <div class="stats-big-card">
+        <h3>Por Status</h3>
+        <div class="stats-row"><span>🟣 Novos</span><span class="purple" id="st-novo">—</span></div>
+        <div class="stats-row"><span>🔵 Enviados</span><span class="blue" id="st-enviado">—</span></div>
+        <div class="stats-row"><span>🟡 Respondidos</span><span class="yellow" id="st-respondido">—</span></div>
+        <div class="stats-row"><span>🟢 Convertidos</span><span class="green" id="st-convertido">—</span></div>
+      </div>
+      <div class="stats-big-card">
+        <h3>Workspace</h3>
+        <div class="stats-row"><span>Nome</span><span id="st-ws-nome">—</span></div>
+        <div class="stats-row"><span>Plano</span><span id="st-ws-plano">—</span></div>
+        <div class="stats-row"><span>Leads usados</span><span id="st-ws-usados">—</span></div>
+        <div class="stats-row"><span>Limite</span><span id="st-ws-limite">—</span></div>
+      </div>
+    </div>
+  </div>
+
+</main>
+
+<!-- MODAL VER / EDITAR LEAD -->
+<div class="modal-overlay" id="modal-lead">
+  <div class="modal">
+    <h3>📋 Detalhes do Lead</h3>
+    <div class="modal-field"><label>Lead</label><p id="modal-nome">—</p></div>
+    <div class="modal-field"><label>Comentário original</label><p id="modal-comentario">—</p></div>
+    <div class="modal-field">
+      <label>Mensagem gerada pela IA</label>
+      <div id="modal-ia-loading" class="ia-loading" style="display:none">🤖 Gerando mensagem personalizada...</div>
+      <textarea id="modal-mensagem" rows="5"></textarea>
+    </div>
+    <div class="modal-field"><label>Status</label>
+      <select class="status-select" id="modal-status">
+        <option value="novo">Novo</option>
+        <option value="enviado">Enviado</option>
+        <option value="respondido">Respondido</option>
+        <option value="convertido">Convertido</option>
+      </select>
+    </div>
+    <div class="modal-actions">
+      <button class="btn btn-outline" onclick="fecharModal()">Fechar</button>
+      <button class="btn btn-outline" onclick="gerarMensagemIA()" style="border-color:#7c3aed33;color:#a78bfa;">🤖 Regerar IA</button>
+      <button class="btn btn-primary" onclick="copiarMensagem()">📋 Copiar</button>
+    </div>
+  </div>
+</div>
+
+<script>
+const TOKEN = localStorage.getItem("leadbot_token") || prompt("Cole seu token LeadBot Pro:") || "";
+if (TOKEN) localStorage.setItem("leadbot_token", TOKEN);
+const API = "https://meu-projeto-2-hqv1.onrender.com";
+
+let todosLeads  = [];
+let filtroAtual = "todos";
+let leadAtual   = null;
+
+// ── Navegação ──
+function showSection(id, el) {
+  document.querySelectorAll(".section").forEach(s => s.classList.remove("active"));
+  document.querySelectorAll(".nav-item").forEach(n => n.classList.remove("active"));
+  document.getElementById("section-" + id).classList.add("active");
+  if (el) el.classList.add("active");
+  if (id === "estatisticas") atualizarStats();
+}
+
+// ── Init ──
+async function init() {
+  await carregarStatus();
+  await carregarLeads();
+}
+
+// ── Status ──
+async function carregarStatus() {
+  try {
+    const r = await fetch(`${API}/api/status`, { headers: { "Authorization": `Bearer ${TOKEN}` } });
+    const d = await r.json();
+    document.getElementById("ws-nome").textContent  = d.workspace || "—";
+    document.getElementById("ws-plano").textContent = "Plano " + (d.plano || "—");
+    document.getElementById("ws-uso").textContent   = `${d.usados||0} / ${d.limite===999999?"∞":d.limite} leads`;
+  } catch(e) { document.getElementById("ws-nome").textContent = "Erro de conexão"; }
+}
+
+// ── Leads ──
+async function carregarLeads() {
+  try {
+    const r = await fetch(`${API}/api/leads`, { headers: { "Authorization": `Bearer ${TOKEN}` } });
+    todosLeads = await r.json();
+    renderLeads();
+  } catch(e) {
+    document.getElementById("leads-tbody").innerHTML =
+      `<tr><td colspan="6" class="empty"><h3>Erro ao carregar leads</h3></td></tr>`;
+  }
+}
+
+function atualizarStats() {
+  document.getElementById("total-leads").textContent       = todosLeads.length;
+  document.getElementById("leads-novos").textContent       = todosLeads.filter(l=>l.status==="novo").length;
+  document.getElementById("leads-respondidos").textContent = todosLeads.filter(l=>l.status==="respondido").length;
+  document.getElementById("leads-convertidos").textContent = todosLeads.filter(l=>l.status==="convertido").length;
+  // stats page
+  document.getElementById("stat-total").textContent    = todosLeads.length;
+  const conv = todosLeads.filter(l=>l.status==="convertido").length;
+  document.getElementById("stat-conversao").textContent = todosLeads.length
+    ? Math.round(conv/todosLeads.length*100)+"%" : "0%";
+  document.getElementById("stat-mensagens").textContent = todosLeads.filter(l=>l.mensagem_gerada).length;
+  document.getElementById("st-novo").textContent       = todosLeads.filter(l=>l.status==="novo").length;
+  document.getElementById("st-enviado").textContent    = todosLeads.filter(l=>l.status==="enviado").length;
+  document.getElementById("st-respondido").textContent = todosLeads.filter(l=>l.status==="respondido").length;
+  document.getElementById("st-convertido").textContent = conv;
+  document.getElementById("st-ws-nome").textContent    = document.getElementById("ws-nome").textContent;
+  document.getElementById("st-ws-plano").textContent   = document.getElementById("ws-plano").textContent;
+}
+
+function renderLeads() {
+  const busca = document.getElementById("search").value.toLowerCase();
+  const filtrados = todosLeads.filter(l => {
+    const mf = filtroAtual==="todos" || l.status===filtroAtual;
+    const mb = !busca || (l.nome||"").toLowerCase().includes(busca) ||
+               (l.username||"").toLowerCase().includes(busca) ||
+               (l.comentario||"").toLowerCase().includes(busca);
+    return mf && mb;
+  });
+  atualizarStats();
+  if (!filtrados.length) {
+    document.getElementById("leads-tbody").innerHTML =
+      `<tr><td colspan="6" class="empty"><h3>Nenhum lead encontrado</h3><p>Processe um post para gerar leads</p></td></tr>`;
+    return;
+  }
+  document.getElementById("leads-tbody").innerHTML = filtrados.map(l => `
+    <tr>
+      <td><div class="lead-info">
+        <div class="avatar">${(l.nome||"?")[0].toUpperCase()}</div>
+        <div><div class="lead-name">${l.nome||"—"}</div><div class="lead-user">@${l.username||"—"}</div></div>
+      </div></td>
+      <td><div class="msg-preview">${l.comentario||"—"}</div></td>
+      <td><div class="msg-preview" style="color:${l.mensagem_gerada?'#a78bfa':'#333'}">${l.mensagem_gerada||"—"}</div></td>
+      <td><span class="badge ${l.status||'novo'}">${l.status||"novo"}</span></td>
+      <td style="color:#666;font-size:13px">${formatarData(l.created_at)}</td>
+      <td><div class="actions-cell">
+        <button class="action-btn ia" onclick="abrirLeadComIA('${l.id}')">🤖 IA</button>
+        <button class="action-btn" onclick="verLead('${l.id}')">Ver →</button>
+      </div></td>
+    </tr>
+  `).join("");
+}
+
+function setFiltro(f, btn) {
+  filtroAtual = f;
+  document.querySelectorAll(".filter-btn").forEach(b => b.classList.remove("active"));
+  btn.classList.add("active");
+  renderLeads();
+}
+
+// ── Modal Lead ──
+function verLead(id) {
+  leadAtual = todosLeads.find(l => l.id===id);
+  if (!leadAtual) return;
+  document.getElementById("modal-nome").textContent       = `${leadAtual.nome||"—"} (@${leadAtual.username||"—"})`;
+  document.getElementById("modal-comentario").textContent = leadAtual.comentario||"—";
+  document.getElementById("modal-mensagem").value         = leadAtual.mensagem_gerada||"";
+  document.getElementById("modal-status").value           = leadAtual.status||"novo";
+  document.getElementById("modal-ia-loading").style.display = "none";
+  document.getElementById("modal-mensagem").style.display  = "block";
+  document.getElementById("modal-lead").classList.add("open");
+}
+
+async function abrirLeadComIA(id) {
+  verLead(id);
+  if (!leadAtual.mensagem_gerada) await gerarMensagemIA();
+}
+
+async function gerarMensagemIA() {
+  if (!leadAtual) return;
+  document.getElementById("modal-ia-loading").style.display = "block";
+  document.getElementById("modal-mensagem").style.display   = "none";
+  try {
+    const r = await fetch(`${API}/api/gerar-mensagem`, {
+      method:"POST",
+      headers:{ "Authorization":`Bearer ${TOKEN}`, "Content-Type":"application/json" },
+      body: JSON.stringify({ nome: leadAtual.nome, comentario: leadAtual.comentario })
+    });
+    const d = await r.json();
+    document.getElementById("modal-mensagem").value = d.mensagem || "Erro ao gerar mensagem";
+    leadAtual.mensagem_gerada = d.mensagem;
+  } catch(e) {
+    document.getElementById("modal-mensagem").value = "Erro ao conectar com a API";
+  } finally {
+    document.getElementById("modal-ia-loading").style.display = "none";
+    document.getElementById("modal-mensagem").style.display   = "block";
+  }
+}
+
+function fecharModal() {
+  document.getElementById("modal-lead").classList.remove("open");
+  leadAtual = null;
+}
+
+function copiarMensagem() {
+  navigator.clipboard.writeText(document.getElementById("modal-mensagem").value);
+  alert("✅ Mensagem copiada!");
+}
+
+// ── Processar Post ──
+async function processarPost() {
+  const postId = document.getElementById("post-id-input").value.trim();
+  if (!postId) return alert("Cole o ID do post!");
+  const btn = document.getElementById("btn-processar");
+  btn.textContent = "⏳ Processando..."; btn.disabled = true;
+  const result = document.getElementById("process-result");
+  result.style.display = "block"; result.style.color = "#666"; result.textContent = "Buscando comentários...";
+  try {
+    const r = await fetch(`${API}/api/processar`, {
+      method:"POST",
+      headers:{ "Authorization":`Bearer ${TOKEN}`, "Content-Type":"application/json" },
+      body: JSON.stringify({ post_id: postId })
+    });
+    const d = await r.json();
+    if (d.erro) { result.style.color="#ef4444"; result.textContent="❌ "+d.erro; }
+    else {
+      result.style.color="#10b981";
+      result.textContent=`✅ ${d.total} leads gerados! Redirecionando...`;
+      setTimeout(()=>{ document.getElementById("post-id-input").value=""; carregarLeads(); showSection("leads", document.querySelectorAll(".nav-item")[0]); }, 2000);
+    }
+  } catch(e) { result.style.color="#ef4444"; result.textContent="❌ Erro ao conectar com a API"; }
+  finally { btn.textContent="⚡ Processar agora"; btn.disabled=false; }
+}
+
+function formatarData(iso) {
+  if (!iso) return "—";
+  return new Date(iso).toLocaleDateString("pt-BR",{ day:"2-digit",month:"2-digit",year:"2-digit",hour:"2-digit",minute:"2-digit" });
+}
+
+document.querySelectorAll(".modal-overlay").forEach(m => {
+  m.addEventListener("click", e => { if(e.target===m) m.classList.remove("open"); });
+});
+
+init();
+</script>
+</body>
+</html>
