@@ -50,7 +50,7 @@ def listar_leads():
     leads = supabase.table("leads")\
         .select("*")\
         .eq("workspace_id", ws["id"])\
-        .order("created_at", desc=True)\
+        .order("created_time", desc=True)\
         .execute()
     return jsonify(leads.data)
 
